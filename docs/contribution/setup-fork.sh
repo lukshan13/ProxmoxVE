@@ -131,28 +131,36 @@ update_links() {
 
   echo ""
 
-  # Find all files containing the old repo reference
+  # Find all files containing the old repo reference (github.com or raw.githubusercontent.com)
+  # In --full mode include frontend .tsx, .ts, .mjs so install/script URLs get updated
+  local find_cmd
+  if [[ "$UPDATE_ALL" == "true" ]]; then
+    find_cmd="find \"$search_path\" -type f \( -name \"*.md\" -o -name \"*.sh\" -o -name \"*.func\" -o -name \"*.json\" -o -name \"*.tsx\" -o -name \"*.ts\" -o -name \"*.mjs\" \) -not -path \"*/.git/*\" 2>/dev/null"
+  else
+    find_cmd="find \"$search_path\" -type f \( -name \"*.md\" -o -name \"*.sh\" -o -name \"*.func\" -o -name \"*.json\" \) -not -path \"*/.git/*\" 2>/dev/null"
+  fi
+
   while IFS= read -r file; do
-    # Count occurrences
-    local count=$(grep -c "github.com/$old_repo/$old_name" "$file" 2>/dev/null || echo 0)
+    [[ -z "$file" || ! -f "$file" ]] && continue
+    local count_github=$(grep -c "github.com/$old_repo/$old_name" "$file" 2>/dev/null || echo 0)
+    local count_raw=$(grep -c "raw.githubusercontent.com/$old_repo/$old_name" "$file" 2>/dev/null || echo 0)
+    local count=$((count_github + count_raw))
 
     if [[ $count -gt 0 ]]; then
-      # Backup original
       cp "$file" "$file.backup"
 
-      # Replace links - use different sed syntax for BSD/macOS vs GNU sed
       if sed --version &>/dev/null 2>&1; then
-        # GNU sed
         sed -i "s|github.com/$old_repo/$old_name|github.com/$new_owner/$new_repo|g" "$file"
+        sed -i "s|raw.githubusercontent.com/$old_repo/$old_name|raw.githubusercontent.com/$new_owner/$new_repo|g" "$file"
       else
-        # BSD sed (macOS)
         sed -i '' "s|github.com/$old_repo/$old_name|github.com/$new_owner/$new_repo|g" "$file"
+        sed -i '' "s|raw.githubusercontent.com/$old_repo/$old_name|raw.githubusercontent.com/$new_owner/$new_repo|g" "$file"
       fi
 
       ((files_updated++))
       print_success "Updated $file ($count links)"
     fi
-  done < <(find "$search_path" -type f \( -name "*.md" -o -name "*.sh" -o -name "*.func" -o -name "*.json" \) -not -path "*/.git/*" 2>/dev/null | xargs grep -l "github.com/$old_repo/$old_name" 2>/dev/null)
+  done < <(eval "$find_cmd" | xargs grep -l -E "github\.com/$old_repo/$old_name|raw\.githubusercontent\.com/$old_repo/$old_name" 2>/dev/null || true)
 
   return $files_updated
 }
@@ -173,15 +181,15 @@ create_git_setup_info() {
 git remote -v
 
 # If you don't have 'upstream' configured, add it:
-git remote add upstream https://github.com/community-scripts/ProxmoxVE.git
+git remote add upstream https://github.com/lukshan13/ProxmoxVE.git
 
 # Verify both remotes exist:
 git remote -v
 # Should show:
 # origin     https://github.com/YOUR_USERNAME/ProxmoxVE.git (fetch)
 # origin     https://github.com/YOUR_USERNAME/ProxmoxVE.git (push)
-# upstream   https://github.com/community-scripts/ProxmoxVE.git (fetch)
-# upstream   https://github.com/community-scripts/ProxmoxVE.git (push)
+# upstream   https://github.com/lukshan13/ProxmoxVE.git (fetch)
+# upstream   https://github.com/lukshan13/ProxmoxVE.git (push)
 ```
 
 ### Configure Git User (if not done globally)
@@ -272,6 +280,28 @@ else
   fi
 fi
 
+# If USERNAME still empty (e.g. ./setup-fork.sh --full with no args), try auto-detect
+if [[ -z "$USERNAME" ]]; then
+  if username=$(detect_username); then
+    USERNAME="$username"
+    print_success "Detected GitHub username: $USERNAME"
+  else
+    print_error "Username cannot be empty and could not auto-detect from git config"
+    echo -e "${YELLOW}Run from a git clone with origin set to your fork, or pass your username:${NC}"
+    echo "  ./setup-fork.sh --full YOUR_USERNAME"
+    exit 1
+  fi
+  if [[ -z "$REPO_NAME" ]]; then
+    if repo_name=$(detect_repo_name); then
+      REPO_NAME="$repo_name"
+      [[ "$REPO_NAME" != "ProxmoxVE" ]] && print_info "Detected repo name: $REPO_NAME" || print_success "Using repo name: ProxmoxVE"
+    else
+      REPO_NAME="ProxmoxVE"
+      print_success "Using default repo name: ProxmoxVE"
+    fi
+  fi
+fi
+
 # Validate inputs
 if [[ -z "$USERNAME" ]]; then
   print_error "Username cannot be empty"
@@ -321,7 +351,7 @@ echo ""
 
 print_success "All documentation links updated to point to your fork"
 print_info "Your fork: https://github.com/$USERNAME/$REPO_NAME"
-print_info "Upstream: https://github.com/community-scripts/ProxmoxVE"
+print_info "Upstream: https://github.com/lukshan13/ProxmoxVE"
 echo ""
 
 echo -e "${BLUE}Next Steps:${NC}"
