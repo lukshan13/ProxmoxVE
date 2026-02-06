@@ -2,7 +2,7 @@
 
 # Copyright (c) 2021-2026 community-scripts ORG
 # Author: lukshan13
-# License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
+# License: MIT | https://github.com/lukshan13/ProxmoxVE/raw/main/LICENSE
 # Source: https://github.com/simonrob/email-oauth2-proxy
 
 source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"

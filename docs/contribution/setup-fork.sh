@@ -144,6 +144,11 @@ update_links() {
     [[ -z "$file" || ! -f "$file" ]] && continue
     local count_github=$(grep -c "github.com/$old_repo/$old_name" "$file" 2>/dev/null || echo 0)
     local count_raw=$(grep -c "raw.githubusercontent.com/$old_repo/$old_name" "$file" 2>/dev/null || echo 0)
+    # Use first line, digits only, default 0 (avoids "0\n0" / invalid input in arithmetic)
+    count_github=$(printf '%s' "$count_github" | head -n1 | tr -cd '0-9')
+    count_raw=$(printf '%s' "$count_raw" | head -n1 | tr -cd '0-9')
+    count_github=${count_github:-0}
+    count_raw=${count_raw:-0}
     local count=$((count_github + count_raw))
 
     if [[ $count -gt 0 ]]; then
