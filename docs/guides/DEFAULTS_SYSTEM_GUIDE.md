@@ -728,8 +728,8 @@ EOF
 ### Need More Information?
 
 - 📖 [Main Documentation](../../docs/)
-- 🐛 [Report Issues](https://github.com/community-scripts/ProxmoxVE/issues)
-- 💬 [Discussions](https://github.com/community-scripts/ProxmoxVE/discussions)
+- 🐛 [Report Issues](https://github.com/lukshan13/ProxmoxVE/issues)
+- 💬 [Discussions](https://github.com/lukshan13/ProxmoxVE/discussions)
 
 ### Useful Commands
 
