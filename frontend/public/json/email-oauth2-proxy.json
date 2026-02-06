@@ -1,0 +1,42 @@
+{
+  "name": "Email OAuth2 Proxy",
+  "slug": "email-oauth2-proxy",
+  "categories": [0],
+  "date_created": "2026-02-05",
+  "type": "ct",
+  "updateable": true,
+  "privileged": false,
+  "interface_port": null,
+  "documentation": "https://github.com/simonrob/email-oauth2-proxy",
+  "website": "https://github.com/simonrob/email-oauth2-proxy",
+  "logo": "https://cdn.jsdelivr.net/gh/selfhst/icons@main/webp/email-oauth2-proxy.webp",
+  "config_path": "/etc/emailproxy/emailproxy.config",
+  "description": "IMAP/POP/SMTP proxy that adds OAuth2 support for email clients. Lets you use app passwords or OAuth2 with providers (e.g. Microsoft, Google) on ports IMAP 1993, POP 1995, SMTP 1587.",
+  "install_methods": [
+    {
+      "type": "default",
+      "script": "ct/email-oauth2-proxy.sh",
+      "resources": {
+        "cpu": 1,
+        "ram": 512,
+        "hdd": 2,
+        "os": "Debian",
+        "version": "12"
+      }
+    }
+  ],
+  "default_credentials": {
+    "username": null,
+    "password": null
+  },
+  "notes": [
+    {
+      "text": "Edit /etc/emailproxy/emailproxy.config and add your OAuth client credentials.",
+      "type": "info"
+    },
+    {
+      "text": "First-time auth: use the menu 'Authorise account' or run with --external-auth.",
+      "type": "info"
+    }
+  ]
+}
